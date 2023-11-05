@@ -3,20 +3,23 @@ import {
   loginFailed,
   loginStart,
   loginSuccess,
+  logOutFailed,
+  logOutStart,
+  logOutSuccess,
   registerFailed,
   registerStart,
   registerSuccess,
-} from "./authSlice";
+} from "./authSlice.js";
 import {
   deleteUserFailed,
+  deleteUsersSuccess,
   deleteUserStart,
-  deleteUserSuccess,
-  getUserFailed,
-  getUserStart,
-  getUserSuccess,
-} from "./userSlice";
+  getUsersFailed,
+  getUsersStart,
+  getUsersSuccess,
+} from "./userSlice.js";
+//npm install axios
 
-// LOGIN
 export const loginUser = async (user, dispatch, navigate) => {
   dispatch(loginStart());
   try {
@@ -28,7 +31,6 @@ export const loginUser = async (user, dispatch, navigate) => {
   }
 };
 
-// REGISTER
 export const registerUser = async (user, dispatch, navigate) => {
   dispatch(registerStart());
   try {
@@ -40,28 +42,39 @@ export const registerUser = async (user, dispatch, navigate) => {
   }
 };
 
-// GET ALL USER
 export const getAllUsers = async (accessToken, dispatch, axiosJWT) => {
-  dispatch(getUserStart());
+  dispatch(getUsersStart());
   try {
     const res = await axiosJWT.get("/v1/user", {
       headers: { token: `Bearer ${accessToken}` },
     });
-    dispatch(getUserSuccess(res.data));
+    dispatch(getUsersSuccess(res.data));
   } catch (err) {
-    dispatch(getUserFailed());
+    dispatch(getUsersFailed());
   }
 };
 
-// DELETE USER
 export const deleteUser = async (accessToken, dispatch, id, axiosJWT) => {
   dispatch(deleteUserStart());
   try {
     const res = await axiosJWT.delete("/v1/user/" + id, {
       headers: { token: `Bearer ${accessToken}` },
     });
-    dispatch(deleteUserSuccess(res.data));
+    dispatch(deleteUsersSuccess(res.data));
   } catch (err) {
     dispatch(deleteUserFailed(err.response.data));
+  }
+};
+
+export const logOut = async (dispatch, id, navigate, accessToken, axiosJWT) => {
+  dispatch(logOutStart());
+  try {
+    await axiosJWT.post("/v1/auth/logout", id, {
+      headers: { token: `Bearer ${accessToken}` },
+    });
+    dispatch(logOutSuccess());
+    navigate("/login");
+  } catch (err) {
+    dispatch(logOutFailed());
   }
 };
